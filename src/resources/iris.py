@@ -1,16 +1,12 @@
 import numpy as np
 
-from flask import Flask
-from flask_restful import Resource, Api
+from flask_restful import Resource
 from flask_restful import reqparse
 
-import provider
-
-app = Flask(__name__)
-api = Api(app)
+from src.modules import predict_iris
 
 
-class Prediction(Resource):
+class Iris(Resource):
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument('slength', type=float,
@@ -23,7 +19,7 @@ class Prediction(Resource):
                             help='pwidth cannot be converted.')
         args = parser.parse_args()
 
-        prediction = provider.predict(np.array([
+        prediction = predict_iris.predict(np.array([
             args['slength'],
             args['swidth'],
             args['plength'],
@@ -39,9 +35,3 @@ class Prediction(Resource):
             'pwidth': args['pwidth'],
             'species': prediction[0]
         }
-
-
-api.add_resource(Prediction, '/prediction')
-
-if __name__ == '__main__':
-    app.run('0.0.0.0', 5000, debug=True)
