@@ -1,0 +1,76 @@
+EnvironmentConfigurationMetadata:
+  DateCreated: '1507633027000'
+  DateModified: '1507633027000'
+Platform:
+  PlatformArn: arn:aws:elasticbeanstalk:ap-southeast-1::platform/Node.js running on 64bit Amazon Linux/4.2.2
+OptionSettings:
+  aws:elasticbeanstalk:command:
+    BatchSize: '2'
+    BatchSizeType: Fixed
+    DeploymentPolicy: Rolling
+  aws:elasticbeanstalk:sns:topics:
+    Notification Endpoint: notifyme@mail.com
+  AWSEBSecurityGroup.aws:ec2:vpc:
+    VPCId: vpc-1
+  aws:elasticbeanstalk:application:environment:
+    ELASTICSEARCH_URL: http://localhost:9200
+  aws:elasticbeanstalk:cloudwatch:logs:
+    StreamLogs: true
+  aws:elb:loadbalancer:
+    CrossZone: true
+  aws:elasticbeanstalk:environment:
+    ServiceRole: aws-elasticbeanstalk-service-role
+  aws:autoscaling:trigger:
+    BreachDuration: '1'
+    LowerThreshold: '5'
+    MeasureName: CPUUtilization
+    Period: '1'
+    UpperThreshold: '10'
+    Unit: Percent
+  aws:elasticbeanstalk:healthreporting:system:
+    SystemType: enhanced
+  aws:ec2:vpc:
+    Subnets: subnet-1,subnet-2
+    ELBSubnets: subnet-1,subnet-2
+    ELBScheme: internal
+    AssociatePublicIpAddress: false
+  aws:autoscaling:launchconfiguration:
+    SecurityGroups: sg-1
+    IamInstanceProfile: aws-elasticbeanstalk-ec2-role
+    InstanceType: t2.micro
+    EC2KeyName: {my-ssh-key}
+  aws:autoscaling:asg:
+    MinSize: '1'
+    Cooldown: '0'
+    MaxSize: '1'
+EnvironmentTier:
+  Type: Standard
+  Name: WebServer
+Extensions:
+  InternalServerErrorELBAlert.EBConsoleSnippet:
+    Order: 500
+    SnippetContents:
+      Resources:
+        InternalServerErrorELBAlert:
+          Type: AWS::CloudWatch::Alarm
+          Properties:
+            AlarmActions:
+            - arn:aws:sns:ap-southeast-1:{account_number}:{alarm_name}
+            MetricName: HTTPCode_ELB_5XX
+            ComparisonOperator: GreaterThanThreshold
+            AlarmDescription: Alarm for internal server error cause by burst traffic
+            Statistic: Sum
+            Period: 300
+            Dimensions:
+            - Value:
+                Ref: AWSEBLoadBalancer
+              Name: LoadBalancerName
+            EvaluationPeriods: 2
+            InsufficientDataActions: []
+            Namespace: AWS/ELB
+            OKActions: []
+            Threshold: 100
+AWSConfigurationTemplateVersion: 1.1.0.0
+Tags:
+  Environment: {env}
+  Application: {application_name}
