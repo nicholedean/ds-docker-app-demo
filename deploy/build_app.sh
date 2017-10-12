@@ -3,4 +3,4 @@
 sed \
 -e "s/\${VAR_A}/'${VAR_A}'/" \
 -e "s/\${VAR_B}/'${VAR_B}'/" \
-config/env_build.cfg > config/env.cfg
+../src/config/env_build.cfg > ../src/config/env.cfg
